@@ -1,0 +1,81 @@
+import { db } from "./firebaseConfig.js";
+import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+
+let productos = [];
+
+// Cargar productos desde Firestore
+async function cargarProductos() {
+  productos = [];
+  const querySnapshot = await getDocs(collection(db, "productos"));
+  querySnapshot.forEach((documento) => {
+    productos.push({ id: documento.id, ...documento.data() });
+  });
+  mostrarProductos();
+}
+
+// Agregar producto (solo admin)
+async function agregarProducto() {
+  const nombre = document.getElementById("nombre").value;
+  const precio = document.getElementById("precio").value;
+  const descripcion = document.getElementById("descripcion").value;
+  const foto = document.getElementById("foto").value;
+
+  if (!nombre || !precio || !descripcion || !foto) return alert("Completa todos los campos");
+
+  await addDoc(collection(db, "productos"), { nombre, precio, descripcion, foto });
+  cargarProductos();
+}
+
+// Eliminar producto (solo admin)
+async function eliminarProducto(id) {
+  await deleteDoc(doc(db, "productos", id));
+  cargarProductos();
+}
+
+// Mostrar productos como antes
+function mostrarProductos(filtro = "") {
+  const contenedor = document.getElementById("productos");
+  contenedor.innerHTML = "";
+
+  productos
+    .filter(p => p.nombre.toLowerCase().includes(filtro.toLowerCase()))
+    .forEach((p) => {
+      contenedor.innerHTML += `
+        <div class="card">
+          <img src="${p.foto}" alt="${p.nombre}">
+          <h3>${p.nombre}</h3>
+          <p>${p.descripcion}</p>
+          <p><b>$${p.precio}</b></p>
+          ${document.getElementById("adminPanel").classList.contains("hidden") ? "" : `<button onclick="eliminarProducto('${p.id}')">Eliminar</button>`}
+        </div>
+      `;
+    });
+}
+
+// Filtrar productos
+function filtrarProductos() {
+  const valor = document.getElementById("search").value;
+  mostrarProductos(valor);
+}
+
+// Login admin
+const USER = "Belen192226";
+const PASS = "Fran192226";
+
+function login() {
+  const user = document.getElementById("username").value;
+  const pass = document.getElementById("password").value;
+
+  if(user === USER && pass === PASS) {
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("adminPanel").classList.remove("hidden");
+    alert("Bienvenida Admin! Ahora podés agregar o eliminar productos.");
+    cargarProductos();
+  } else {
+    alert("Usuario o contraseña incorrectos");
+  }
+}
+
+// Inicializar al cargar la página
+window.onload = cargarProductos;
+
