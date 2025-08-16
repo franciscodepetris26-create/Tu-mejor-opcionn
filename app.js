@@ -69,13 +69,13 @@ function login() {
   if(user === USER && pass === PASS) {
     document.getElementById("login").classList.add("hidden");
     document.getElementById("adminPanel").classList.remove("hidden");
-    alert("Bienvenida Admin! Ahora podÈs agregar o eliminar productos.");
+    alert("Bienvenida Admin! Ahora pod√©s agregar o eliminar productos.");
     cargarProductos();
   } else {
-    alert("Usuario o contraseÒa incorrectos");
+    alert("Usuario o contrase√±a incorrectos");
   }
 }
 
-// Inicializar al cargar la p·gina
+// Inicializar al cargar la p√°gina
 window.onload = cargarProductos;
 
